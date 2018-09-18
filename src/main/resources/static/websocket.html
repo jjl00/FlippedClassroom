@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+Welcome<br/><input id="text" type="text" />
+<button onclick="send()">发送消息</button>
+<button onclick="subscribe1()">订阅消息</button>
+<hr/>
+<button onclick="closeWebSocket()">关闭WebSocket连接</button>
+<hr/>
+<div id="message"></div>
+</body>
+<script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+<script src="http://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script type="text/javascript">
+    // 建立连接对象（还未发起连接）
+    var socket = new SockJS("http://localhost:8086/webSocketServer");
+
+    // 获取 STOMP 子协议的客户端对象
+    var stompClient = Stomp.over(socket);
+
+    // 向服务器发起websocket连接并发送CONNECT帧
+    stompClient.connect(
+        {},
+        function connectCallback(frame) {
+            // 连接成功时（服务器响应 CONNECTED 帧）的回调方法
+            setMessageInnerHTML("连接成功");
+             stompClient.subscribe('/app/course/1', function (response) {
+                 var notice = JSON.parse(response.body);
+                 setMessageInnerHTML("/app/course/1 你接收到的消息为:" + notice[1].notice_content);
+            },{"Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNTM3MDY2MjE0LCJleHAiOjE1Mzc5MzAyMTQsInVzZXJuYW1lIjoiZGV2In0.HeaAETYlSO7Y16fcYXubn1cjKGlmdVI5KPDvu_tf5A8"});
+        },
+        function errorCallBack(error) {
+            // 连接失败时（服务器响应 ERROR 帧）的回调方法
+            setMessageInnerHTML("连接失败");
+        }
+    );
+
+    //发送消息
+    function send() {
+        var message = document.getElementById('text').value;
+        var messageJson = JSON.stringify({ "notice_content": message });
+        stompClient.send("/app/course/1", {}, messageJson);
+        setMessageInnerHTML("/app/course/1 你发送的消息:" + message);
+    }
+    //订阅消息
+    function subscribe1() {
+        stompClient.subscribe('/topic/course/1', function (response) {
+            setMessageInnerHTML("已成功订阅/topic/course/1");
+            var notice = JSON.parse(response.body);
+            setMessageInnerHTML("/topic/course/1 你接收到的消息为:" + notice.notice_content);
+        });
+    }
+
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
+
+</script>
+</html>
