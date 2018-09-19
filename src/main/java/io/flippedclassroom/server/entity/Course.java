@@ -32,7 +32,7 @@ public class Course implements Serializable {
     private String code;        // 课程唯一代码
 
     // 课程与用户的多对多关系
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     @JoinTable(name = "tb_user_course", joinColumns = {@JoinColumn(name = "course_id", referencedColumnName = "course_id")}, inverseJoinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "user_id")})
     private List<User> userList;
 

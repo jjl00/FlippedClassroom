@@ -3,6 +3,8 @@ package io.flippedclassroom.server.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
@@ -16,6 +18,8 @@ import javax.persistence.*;
 @ApiModel(value = "用户和通知构成的第三张表")
 @Entity
 @Table(name = "tb_user_notice")
+@Data
+@Accessors(chain = true)
 public class UserNotice {
     @Id
     @GeneratedValue

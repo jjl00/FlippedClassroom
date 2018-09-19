@@ -26,4 +26,8 @@ public interface NoticeRepository extends JpaRepository<Notice,Long> {
     @Modifying
     @Transactional
     int updateNotice(long notice_id,long user_id);
+
+
+
+
 }

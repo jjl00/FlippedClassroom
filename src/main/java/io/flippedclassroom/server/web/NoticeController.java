@@ -1,11 +1,10 @@
 package io.flippedclassroom.server.web;
 
 import io.flippedclassroom.server.annotation.CurrentUser;
-import io.flippedclassroom.server.entity.JsonResponse;
-import io.flippedclassroom.server.entity.Message;
-import io.flippedclassroom.server.entity.Notice;
-import io.flippedclassroom.server.entity.User;
+import io.flippedclassroom.server.entity.*;
 import io.flippedclassroom.server.exception.Http400BadRequestException;
+import io.flippedclassroom.server.repository.UserNoticeRepository;
+import io.flippedclassroom.server.service.CourseService;
 import io.flippedclassroom.server.service.NoticeService;
 import io.flippedclassroom.server.service.RedisService;
 import io.flippedclassroom.server.service.UserService;
@@ -24,16 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
-import java.sql.Date;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -57,6 +54,10 @@ public class NoticeController {
     SimpMessagingTemplate messagingTemplate;
     @Autowired
     RedisService redisService;
+    @Autowired
+    CourseService courseService;
+    @Autowired
+    UserNoticeRepository userNoticeRepository;
 
     @ApiOperation(value = "获取某课程下的通知",tags = "获取某课程下的通知")
     @SubscribeMapping("/course/{course_id}")
@@ -97,6 +98,12 @@ public class NoticeController {
     public void postNotice(Notice notice,@DestinationVariable("course_id") long course_id){
         log.info("开始发送");
         messagingTemplate.convertAndSend("/topic/course/"+course_id,notice);
+        Notice new_notice=noticeService.save(notice);
+        List<UserNotice> list=new ArrayList<>();
+        courseService.findById(course_id).getUserList().forEach((a)->{
+            list.add(new UserNotice().setUser(a).setNotice(new_notice));
+        });
+        userNoticeRepository.save(list);
     }
 
     @ApiOperation(value = "将指定id消息指定为已读",tags = "将指定id消息指定为已读")
