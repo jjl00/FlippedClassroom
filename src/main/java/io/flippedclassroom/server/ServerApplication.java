@@ -14,6 +14,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ import java.util.List;
 @SpringBootApplication
 @RestController
 @ApiIgnore
+@ServletComponentScan
 public class ServerApplication extends SpringBootServletInitializer implements CommandLineRunner {
     @Autowired
     private UserService userService;
@@ -54,9 +56,9 @@ public class ServerApplication extends SpringBootServletInitializer implements C
                 "<br/>\n" +
                 "<div>\n" +
                 "    <ul>\n" +
-                "        <li><p>访问网站：<a href=\"https://web.fc.xd.style/\" target=\"_blank\">https://web.fc.xd.style</a></p></li>\n" +
-                "        <li><p>API 地址：<a href=\"https://api.fc.xd.style/\" target=\"_blank\">https://api.fc.xd.style</a></p></li>\n" +
-                "        <li><p>API 说明：<a href=\"https://api.fc.xd.style/swagger-ui.html\" target=\"_blank\">https://api.fc.xd.style/swagger-ui.html</a>\n" +
+                "        <li><p>访问网站：<a href=\"https://toppest.ink\" target=\"_blank\">https://toppest.ink</a></p></li>\n" +
+                "        <li><p>API 地址：<a href=\"swagger-ui.html\" target=\"_blank\">swagger-ui.html</a></p></li>\n" +
+                "        <li><p>API 说明：<a href=\"swagger-ui.html\" target=\"_blank\">swagger-ui.html</a>\n" +
                 "        </p></li>\n" +
                 "    </ul>\n" +
                 "</div>\n" +

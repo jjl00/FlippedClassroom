@@ -2,6 +2,7 @@ package io.flippedclassroom.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -20,7 +21,7 @@ import java.sql.Date;
 @Entity
 
 @Table(name = "tb_attendance")
-@Api(value = "考勤")
+@ApiModel(value = "考勤")
 public class Attendance {
     @Id
     @GeneratedValue

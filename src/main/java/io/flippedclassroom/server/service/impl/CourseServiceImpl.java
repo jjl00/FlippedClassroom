@@ -29,18 +29,21 @@ public class CourseServiceImpl implements CourseService {
     }
 
 
-    public List<Course> findPartialCourseByUser(long id) {
-        return jdbcTemplate.query("select course_id,code ,course_name,picture from tb_course where course_id in (select course_id from tb_user_course where user_id =?)", new RowMapper<Course>() {
-            @Override
-            public Course mapRow(ResultSet resultSet, int i) throws SQLException {
-                Course course=new Course();
-                course.setCourse_name(resultSet.getNString("course_name"));
-                course.setPicture(resultSet.getNString("picture"));
-                course.setCode(resultSet.getNString("code"));
-                course.setCourse_id(resultSet.getLong(1));
-                return course;
-            }
-        }, id);
+//    public List<Course> findPartialCourseByUser(long id) {
+//        return jdbcTemplate.query("select course_id,code ,course_name,picture from tb_course where course_id in (select course_id from tb_user_course where user_id =?)", new RowMapper<Course>() {
+//            @Override
+//            public Course mapRow(ResultSet resultSet, int i) throws SQLException {
+//                Course course=new Course();
+//                course.setCourse_name(resultSet.getNString("course_name"));
+//                course.setPicture(resultSet.getNString("picture"));
+//                course.setCode(resultSet.getNString("code"));
+//                course.setCourse_id(resultSet.getLong(1));
+//                return course;
+//            }
+//        }, id);
+//    }
+public List<Course> findPartialCourseByUser(long id) {
+    return courseRepository.findPartialCourseByUser(id);
     }
 
     @Override

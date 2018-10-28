@@ -56,9 +56,7 @@ public class AttendanceController {
         }
         List<resultSet> result = new ArrayList();
         Map map = new HashMap();
-        for (Attendance a : list) {
-            result.add(new resultSet(a.getUser().getUser_name(), a.getAbsenteeism()));
-        }
+        list.parallelStream().forEach((a)->result.add(new resultSet(a.getUser().getUser_name(), a.getAbsenteeism())));
         map.put("course_name", courseService.findById(course_id).getCourse_name());
         map.put("attendance", result);
         return new JsonResponse("200", "返回学生考勤信息", map);

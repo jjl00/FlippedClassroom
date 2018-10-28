@@ -2,12 +2,11 @@ package io.flippedclassroom.server.web;
 
 import io.flippedclassroom.server.annotation.CurrentUser;
 import io.flippedclassroom.server.entity.*;
+import io.flippedclassroom.server.entity.im.Message;
+import io.flippedclassroom.server.entity.im.MessageType;
 import io.flippedclassroom.server.exception.Http400BadRequestException;
 import io.flippedclassroom.server.repository.UserNoticeRepository;
-import io.flippedclassroom.server.service.CourseService;
-import io.flippedclassroom.server.service.NoticeService;
-import io.flippedclassroom.server.service.RedisService;
-import io.flippedclassroom.server.service.UserService;
+import io.flippedclassroom.server.service.*;
 import io.flippedclassroom.server.util.AssertUtils;
 import io.flippedclassroom.server.util.DateUtils;
 import io.flippedclassroom.server.util.ThreadLocalUtil;
@@ -24,13 +23,16 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -41,9 +43,10 @@ import java.util.concurrent.TimeUnit;
  * @author HASEE
  * @create 2018-09-18 9:31
  */
-@Api(value = "通知",description = "使用websocket实现服务器与客户端异步通信")
+@Api(tags = "通知",description = "使用websocket实现服务器与客户端异步通信")
 @RestController
 @Slf4j
+@CrossOrigin
 public class NoticeController {
 
     @Autowired
@@ -58,6 +61,8 @@ public class NoticeController {
     CourseService courseService;
     @Autowired
     UserNoticeRepository userNoticeRepository;
+    @Autowired
+    MessageService messageService;
 
     @ApiOperation(value = "获取某课程下的通知",tags = "获取某课程下的通知")
     @SubscribeMapping("/course/{course_id}")
@@ -67,10 +72,10 @@ public class NoticeController {
         try {
             user=tokenAuthorization(token);
         } catch (Http400BadRequestException e) {
-            e.printStackTrace();
+            log.error("token错误");
         }
         List<Notice> list=noticeService.getUnReadNotice(course_id,user.getUser_id());
-        list.forEach((a)->a.setCourse(null));
+        list.parallelStream().forEach((a)->a.setCourse(null));
         return list;
     }
 
@@ -100,17 +105,49 @@ public class NoticeController {
         messagingTemplate.convertAndSend("/topic/course/"+course_id,notice);
         Notice new_notice=noticeService.save(notice);
         List<UserNotice> list=new ArrayList<>();
-        courseService.findById(course_id).getUserList().forEach((a)->{
-            list.add(new UserNotice().setUser(a).setNotice(new_notice));
-        });
+        courseService.findById(course_id).getUserList().parallelStream().forEach((a)->
+            list.add(new UserNotice().setUser(a).setNotice(new_notice))
+        );
         userNoticeRepository.save(list);
     }
 
-    @ApiOperation(value = "将指定id消息指定为已读",tags = "将指定id消息指定为已读")
+    @ApiOperation(value = "将指定id消息指定为已读",notes = "将指定id消息指定为已读")
     @PutMapping("/auth/notice/{notice_id}")
     public JsonResponse updateNotice(@PathVariable long notice_id,@CurrentUser User user){
         noticeService.updateNotice(notice_id,user.getUser_id());
         return new JsonResponse("200","成功将消息更新为已读",null);
     }
+
+    @MessageMapping(value = "/group/{courseId}")
+    public void dynamicGroup(@DestinationVariable Long courseId, @Header(value = "Authorization") String token, io.flippedclassroom.server.entity.im.Message msg) throws Http400BadRequestException {
+        System.out.println("test");
+        User user;
+        try {
+            user = this.redisAuthorization(token);
+        } catch (Exception e) {
+            messagingTemplate.convertAndSend("/g/" + courseId, new HashMap<String, Object>(){{
+                put("message", e.getMessage());
+            }});
+            return;
+        }
+        io.flippedclassroom.server.entity.im.Message message = new Message(msg.getContent(), MessageType.GROUP);
+        message.setUser(user);
+        message.setCourseId(courseId);
+        messageService.save(message);
+        log.info(message.getContent());
+        messagingTemplate.convertAndSend("/g/" + courseId, new HashMap<String, Object>(){{
+            put("message", message);
+        }});
+    }
+
+    private User redisAuthorization(String token) throws Http400BadRequestException {
+        String username = redisService.get(token);
+        if (username != null) {
+            return userService.findUserByUsername(username);
+        } else {
+            return this.tokenAuthorization(token);
+        }
+    }
+
 
 }

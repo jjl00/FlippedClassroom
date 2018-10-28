@@ -1,5 +1,6 @@
 package io.flippedclassroom.server.repository;
 
+import io.flippedclassroom.server.entity.Course;
 import io.flippedclassroom.server.entity.MyFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,6 @@ import java.util.List;
 public interface MyFileReposiory extends JpaRepository<MyFile, Long> {
     @Query(value = "select * from tb_file where course_id=?1 and file_format=?2",nativeQuery = true)
     List<MyFile> assertReapt(long course_id,String file_format);
+
+    List<MyFile> findByCourse(Course course);
 }

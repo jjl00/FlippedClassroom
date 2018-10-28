@@ -12,7 +12,10 @@ import io.flippedclassroom.server.service.UserService;
 import io.flippedclassroom.server.util.*;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.shiro.SecurityUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -58,8 +63,20 @@ public class UserController {
         }
         EncryptUtils.encrypt(user);
         user.setRole(role);
-        userService.save(user);
-        return new JsonResponse("200", "成功注册！", null);
+        User user1=userService.save(user);
+//        String url = "https://api.netease.im/nimserver/user/create.action";
+//        List<NameValuePair> pairs = new ArrayList<>();
+//        pairs.add(new BasicNameValuePair("accid", user1.getUser_id()+""));
+//        pairs.add(new BasicNameValuePair("name",user.getUser_name()));
+//        JSONObject jsonObject=null;
+//        try {
+//            jsonObject=ImUtil.commonHttpRequest(url,pairs);
+//        } catch (Exception e) {
+//            return new JsonResponse("5xx","出现异常",null);
+//        }
+//        JSONObject info=(JSONObject)jsonObject.get("info");
+//        return new JsonResponse(jsonObject.get("code").toString(),"请求成功",info.toString());
+        return new JsonResponse("200","注册成功",null);
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)

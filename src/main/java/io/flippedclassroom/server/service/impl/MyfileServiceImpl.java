@@ -1,5 +1,6 @@
 package io.flippedclassroom.server.service.impl;
 
+import io.flippedclassroom.server.entity.Course;
 import io.flippedclassroom.server.entity.MyFile;
 import io.flippedclassroom.server.repository.MyFileReposiory;
 import io.flippedclassroom.server.service.MyFileService;
@@ -69,5 +70,9 @@ public class MyfileServiceImpl implements MyFileService {
             }
         }
         return tag;
+    }
+
+    public List<MyFile> findByCourseId(long course_id){
+        return myFileReposiory.findByCourse(new Course().setCourse_id(course_id));
     }
 }

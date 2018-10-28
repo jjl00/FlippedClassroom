@@ -51,20 +51,10 @@ public class CourseController {
     )
     public JsonResponse getCourses(@ApiIgnore @CurrentUser User user) {
         Map<String, Object> map = new HashMap<>();
-        @Data
-        @Accessors(chain = true)
-        class ResultSet{
-            String course_name;
-            String code;
-            String picture;
-            long course_id;
-        }
+
         List<Course> list= courseService.findPartialCourseByUser(user.getUser_id());
-        List<ResultSet> result=list.parallelStream().map((a)-> {
-            return new ResultSet().setCode(a.getCode()).setCourse_name(a.getCourse_name())
-                    .setPicture(a.getPicture()).setCourse_id(a.getCourse_id());
-        }).collect(Collectors.toList());
-        map.put("courses",result);
+
+        map.put("courses",list);
         return new JsonResponse("200", "请求成功", map);
     }
 

@@ -30,7 +30,7 @@ public class User implements Serializable {
     @JsonIgnore
     private String salt;        // 每个用户唯一的盐
     private String nickname;   // 昵称
-    private String avatar;      // 头像文件地址
+    private String avatar="/var/www/uploads/avatar/user-0.png";      // 头像文件地址
     private String gender = "男";      // 性别
     private String signature = "";   // 个性签名
 

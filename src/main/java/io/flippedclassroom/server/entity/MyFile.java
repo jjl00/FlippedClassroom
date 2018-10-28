@@ -29,7 +29,7 @@ public class MyFile {
     @Id
     @GeneratedValue
     long file_id;
-    @JsonIgnore
+
     private String position;  //文件位置
     private long size;       //文件大小
     private String file_name; //文件名字

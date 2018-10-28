@@ -5,9 +5,12 @@
     <title>Title</title>
 </head>
 <body>
-Welcome<br/><input id="text" type="text" />
-<button onclick="send()">发送消息</button>
-<button onclick="subscribe1()">订阅消息</button>
+Welcome<br/>
+要发送的消息<input id="text" type="text" />
+token <input id="token" type="text" />
+<button onclick="send()">向课程1发送消息</button>
+<button onclick="subscribe1()">监听课程1</button>
+
 <hr/>
 <button onclick="closeWebSocket()">关闭WebSocket连接</button>
 <hr/>
@@ -18,7 +21,7 @@ Welcome<br/><input id="text" type="text" />
 <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
 <script type="text/javascript">
     // 建立连接对象（还未发起连接）
-    var socket = new SockJS("http://localhost:8086/webSocketServer");
+    var socket = new SockJS("http://toppest.ink:8086/im");
 
     // 获取 STOMP 子协议的客户端对象
     var stompClient = Stomp.over(socket);
@@ -29,10 +32,10 @@ Welcome<br/><input id="text" type="text" />
         function connectCallback(frame) {
             // 连接成功时（服务器响应 CONNECTED 帧）的回调方法
             setMessageInnerHTML("连接成功");
-             stompClient.subscribe('/app/course/1', function (response) {
-                 var notice = JSON.parse(response.body);
-                 setMessageInnerHTML("/app/course/1 你接收到的消息为:" + notice[1].notice_content);
-            },{"Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNTM3MDY2MjE0LCJleHAiOjE1Mzc5MzAyMTQsInVzZXJuYW1lIjoiZGV2In0.HeaAETYlSO7Y16fcYXubn1cjKGlmdVI5KPDvu_tf5A8"});
+            //  stompClient.subscribe('/app/course/1', function (response) {
+            //      var notice = JSON.parse(response.body);
+            //      setMessageInnerHTML("/app/course/1 你接收到的消息为:" + notice[1].notice_content);
+            // },{"Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoxNTM3MDY2MjE0LCJleHAiOjE1Mzc5MzAyMTQsInVzZXJuYW1lIjoiZGV2In0.HeaAETYlSO7Y16fcYXubn1cjKGlmdVI5KPDvu_tf5A8"});
         },
         function errorCallBack(error) {
             // 连接失败时（服务器响应 ERROR 帧）的回调方法
@@ -43,16 +46,17 @@ Welcome<br/><input id="text" type="text" />
     //发送消息
     function send() {
         var message = document.getElementById('text').value;
-        var messageJson = JSON.stringify({ "notice_content": message });
-        stompClient.send("/app/course/1", {}, messageJson);
-        setMessageInnerHTML("/app/course/1 你发送的消息:" + message);
+        var token = document.getElementById('token').value;
+        var messageJson = JSON.stringify({ "content": message });
+        stompClient.send("/group/1", {"Authorization":token}, messageJson);
+        setMessageInnerHTML("/group/1 你发送的消息:" + message);
     }
     //订阅消息
     function subscribe1() {
-        stompClient.subscribe('/topic/course/1', function (response) {
-            setMessageInnerHTML("已成功订阅/topic/course/1");
+        stompClient.subscribe('/g/1', function (response) {
+            setMessageInnerHTML("已成功订阅/g/1");
             var notice = JSON.parse(response.body);
-            setMessageInnerHTML("/topic/course/1 你接收到的消息为:" + notice.notice_content);
+            setMessageInnerHTML("/g/1 你接收到的消息为:" + notice.message.content);
         });
     }
 

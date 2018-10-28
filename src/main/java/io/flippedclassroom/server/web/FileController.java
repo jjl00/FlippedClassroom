@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -129,6 +130,13 @@ public class FileController {
         return new JsonResponse("200", "文件上传成功", null);
     }
 
+    @GetMapping("/course/{course_id}/all")
+    @ApiOperation(value = "获取某一课程下所有文件", httpMethod = "GET")
+    public JsonResponse getAllFile( @PathVariable("course_id") Long course_id) throws Exception {
+        List<MyFile> list=courseService.findById(course_id).getMyFileList();
+        return new JsonResponse("200","请求成功",list);
+    }
+
     @GetMapping("/course/{course_id}/file/{file_format}")
     @ApiOperation(value = "获取某一课程下某一格式的文件列表", httpMethod = "GET",notes = "文件格式有(\"picture\"),\n" +
             "    (\"video\"),\n" +
@@ -136,8 +144,12 @@ public class FileController {
             "    (\"document\"); 然后可以根据文件的属性position，调用下载的api进行下载")
     public JsonResponse getFileList( @PathVariable("course_id") Long course_id, @PathVariable String file_format) throws Exception {
         List<MyFile> list=courseService.findById(course_id).getMyFileList();
+        list=list.parallelStream().filter((a)->a.getFileFormat().equals(file_format)).collect(Collectors.toList());
         return new JsonResponse("200","请求成功",list);
     }
+
+
+
 
     @GetMapping("/file/{file_id}")
     @ApiOperation(value = "下载文件", httpMethod = "GET")
